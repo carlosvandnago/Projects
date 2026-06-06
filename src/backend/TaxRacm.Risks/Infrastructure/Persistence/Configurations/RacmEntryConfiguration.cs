@@ -32,8 +32,8 @@ public class RacmEntryConfiguration : IEntityTypeConfiguration<RacmEntry>
         builder.Property(e => e.Consequences).HasConversion(
             l => JsonSerializer.Serialize(l, (JsonSerializerOptions?)null),
             j => JsonSerializer.Deserialize<List<string>>(j, (JsonSerializerOptions?)null) ?? new());
-        builder.HasMany<RacmEntityLink>("_linkedEntities").WithOne().HasForeignKey(l => l.RacmEntryId);
-        builder.Navigation("_linkedEntities").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.HasMany(e => e.LinkedEntities).WithOne().HasForeignKey(l => l.RacmEntryId);
+        builder.Navigation(e => e.LinkedEntities).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Property(e => e.Name).HasMaxLength(300).IsRequired();
         builder.Property(e => e.Notes).HasMaxLength(2000);
         builder.ToTable("RacmEntries");

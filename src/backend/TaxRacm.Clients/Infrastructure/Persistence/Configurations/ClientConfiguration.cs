@@ -14,11 +14,11 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .HasConversion(id => id.Value, value => new ClientId(value));
         builder.Property(c => c.Name).HasMaxLength(200).IsRequired();
         builder.Property(c => c.Industry).HasMaxLength(100).IsRequired();
-        builder.HasMany<TaxEntity>("_entities")
+        builder.HasMany(c => c.Entities)
             .WithOne()
             .HasForeignKey(e => e.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_entities").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(c => c.Entities).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.ToTable("Clients");
     }
 }
