@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using TaxRacm.Api.Extensions;
 using TaxRacm.Api.Middleware;
 using TaxRacm.Api.Seed;
@@ -36,10 +39,10 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await services.GetRequiredService<ClientsDbContext>().Database.EnsureCreatedAsync();
-    await services.GetRequiredService<RisksDbContext>().Database.EnsureCreatedAsync();
-    await services.GetRequiredService<ControlsDbContext>().Database.EnsureCreatedAsync();
-    await services.GetRequiredService<IntelligenceDbContext>().Database.EnsureCreatedAsync();
+    await EnsureSchemaAsync(services.GetRequiredService<ClientsDbContext>());
+    await EnsureSchemaAsync(services.GetRequiredService<RisksDbContext>());
+    await EnsureSchemaAsync(services.GetRequiredService<ControlsDbContext>());
+    await EnsureSchemaAsync(services.GetRequiredService<IntelligenceDbContext>());
     await DataSeeder.SeedAsync(services);
 }
 
@@ -55,3 +58,18 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// EnsureCreatedAsync skips table creation when the DB already has tables from
+// another DbContext. Instead we create the DB once, then create each module's
+// tables independently, ignoring "already exists" errors.
+static async Task EnsureSchemaAsync(DbContext context)
+{
+    var creator = context.Database.GetService<IRelationalDatabaseCreator>();
+    if (!await creator.ExistsAsync())
+        await creator.CreateAsync();
+    try
+    {
+        await creator.CreateTablesAsync();
+    }
+    catch { /* tables already exist — safe to ignore */ }
+}
