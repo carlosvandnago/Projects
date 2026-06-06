@@ -24,16 +24,16 @@ public class ControlsController : ControllerBase
     }
 
     [HttpGet("overdue")]
-    public async Task<IActionResult> GetOverdue(CancellationToken ct)
+    public async Task<IActionResult> GetOverdue([FromQuery] Guid clientId, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetOverdueControlsQuery(), ct);
+        var result = await _mediator.Send(new GetOverdueControlsQuery(clientId), ct);
         return Ok(result);
     }
 
     [HttpGet("upcoming")]
-    public async Task<IActionResult> GetUpcoming([FromQuery] int days = 30, CancellationToken ct = default)
+    public async Task<IActionResult> GetUpcoming([FromQuery] Guid clientId, [FromQuery] int days = 30, CancellationToken ct = default)
     {
-        var result = await _mediator.Send(new GetUpcomingDeadlinesQuery(days), ct);
+        var result = await _mediator.Send(new GetUpcomingDeadlinesQuery(clientId, days), ct);
         return Ok(result);
     }
 

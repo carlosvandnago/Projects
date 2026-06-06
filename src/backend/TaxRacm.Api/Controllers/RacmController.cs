@@ -28,21 +28,21 @@ public class RacmController : ControllerBase
     [HttpGet("{clientId:guid}/{riskId:guid}")]
     public async Task<IActionResult> GetById(Guid clientId, Guid riskId, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetRiskByIdQuery(riskId, clientId), ct);
+        var result = await _mediator.Send(new GetRiskByIdQuery(riskId), ct);
         return result.IsSuccess ? Ok(result.Value) : NotFound(new ProblemDetails { Title = result.Error });
     }
 
     [HttpGet("{clientId:guid}/{riskId:guid}/bowtie")]
     public async Task<IActionResult> GetBowTie(Guid clientId, Guid riskId, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetBowTieDataQuery(riskId, clientId), ct);
+        var result = await _mediator.Send(new GetBowTieDataQuery(clientId, riskId), ct);
         return result.IsSuccess ? Ok(result.Value) : NotFound(new ProblemDetails { Title = result.Error });
     }
 
     [HttpPost("{clientId:guid}/toggle-bank-risk")]
     public async Task<IActionResult> ToggleBankRisk(Guid clientId, [FromBody] ToggleBankRiskRequest request, CancellationToken ct)
     {
-        var command = new ToggleRiskFromBankCommand(clientId, request.RiskBankEntryId, request.RequestedById);
+        var command = new ToggleRiskFromBankCommand(clientId, request.RiskBankEntryId, request.GlobalOwnerId, request.GrossLikelihood, request.GrossImpact, request.LinkedEntityIds ?? new List<Guid>());
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(new ProblemDetails { Title = result.Error });
     }
@@ -80,7 +80,7 @@ public class RacmController : ControllerBase
     }
 }
 
-public record ToggleBankRiskRequest(Guid RiskBankEntryId, Guid RequestedById);
+public record ToggleBankRiskRequest(Guid RiskBankEntryId, Guid GlobalOwnerId, int GrossLikelihood, int GrossImpact, List<Guid>? LinkedEntityIds);
 public record UpdateRiskScoreRequest(int NetLikelihood, int NetImpact);
 public record UpdateRiskNarrativeRequest(List<string> Causes, List<string> Consequences, string Notes);
 public record LinkEntityRequest(Guid EntityId, Guid? LocalOwnerId);

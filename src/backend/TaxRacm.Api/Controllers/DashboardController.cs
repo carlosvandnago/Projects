@@ -17,8 +17,8 @@ public class DashboardController : ControllerBase
     public async Task<IActionResult> GetDashboard(Guid clientId, CancellationToken ct)
     {
         var racmTask = _mediator.Send(new GetRacmByClientQuery(clientId, null, null), ct);
-        var overdueTask = _mediator.Send(new GetOverdueControlsQuery(), ct);
-        var upcomingTask = _mediator.Send(new GetUpcomingDeadlinesQuery(30), ct);
+        var overdueTask = _mediator.Send(new GetOverdueControlsQuery(clientId), ct);
+        var upcomingTask = _mediator.Send(new GetUpcomingDeadlinesQuery(clientId, 30), ct);
 
         await Task.WhenAll(racmTask, overdueTask, upcomingTask);
 
@@ -27,7 +27,7 @@ public class DashboardController : ControllerBase
         var upcoming = await upcomingTask;
 
         var ratingBreakdown = racm
-            .GroupBy(r => r.NetRiskRating)
+            .GroupBy(r => r.NetRating)
             .ToDictionary(g => g.Key, g => g.Count());
 
         var taxTypeBreakdown = racm
