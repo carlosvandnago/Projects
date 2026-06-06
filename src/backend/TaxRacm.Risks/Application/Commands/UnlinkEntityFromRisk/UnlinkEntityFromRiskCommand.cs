@@ -1,3 +1,4 @@
+using MediatR;
 using TaxRacm.SharedKernel.Domain;
 
 namespace TaxRacm.Risks.Application.Commands.UnlinkEntityFromRisk;
