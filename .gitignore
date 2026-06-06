@@ -1,0 +1,23 @@
+# Environment secrets
+.env
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
+*.suo
+.vscode/
+*.DotSettings.user
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
